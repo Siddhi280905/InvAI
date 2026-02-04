@@ -3637,10 +3637,10 @@ sustainability_layout = html.Div(className="sustainability-content p-4", childre
 
     # Footer
     html.Div(className="text-center text-muted small py-4", children=[
-        html.Span("GreenInventory Sustainability"),
-        html.Span("Compliance", className="ms-4 cursor-pointer"),
-        html.Span("API Docs", className="ms-3 cursor-pointer"),
-        html.Span("Support", className="ms-3 cursor-pointer"),
+        html.Span(""),
+        html.Span("", className="ms-4 cursor-pointer"),
+        html.Span("", className="ms-3 cursor-pointer"),
+        html.Span("", className="ms-3 cursor-pointer"),
     ])
 ])
 
@@ -3714,6 +3714,7 @@ def update_sustainability_trends(btn_w, btn_m, btn_y):
     
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
