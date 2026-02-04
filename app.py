@@ -2609,40 +2609,62 @@ sales_trends_layout = html.Div(
         ),
 
         # MIDDLE SECTION: Sales and Profit Overview Charts (Row 1)
+# --- Updated Sales & Profit Cards (Layout) ---
 dbc.Row([
     dbc.Col(
         dbc.Card(
             dbc.CardBody([
-                html.Div("Sales Data", className="mb-2 fs-5 fw-bold text-success"), # Title for Sales Data
-                dbc.Button("Daily", id="sales-agg-daily", className="me-1", n_clicks=0),
-                dbc.Button("Weekly", id="sales-agg-weekly", className="me-1", n_clicks=0),
-                dbc.Button("Monthly", id="sales-agg-monthly", className="me-1", n_clicks=0),
-                dbc.Button("Yearly", id="sales-agg-yearly", n_clicks=0),
-
-                # KPI Display for Sales
                 html.Div([
-                    html.H3(id='sales-total-kpi', className="display-5 fw-bold text-primary mb-0"), # Main total
-                    html.Small(id='sales-change-kpi', className="text-success") # Percentage change
-                ], className="d-flex flex-column align-items-start my-3"), # Flexbox for alignment
+                    html.Div("Sales Data", className="fs-5 fw-bold text-success"),
+                    # --- NEW: Date Picker ---
+                    dcc.DatePickerSingle(
+                        id='sales-trend-date-picker',
+                        min_date_allowed=datetime(2020, 1, 1),
+                        max_date_allowed=datetime.now(),
+                        initial_visible_month=datetime.now(),
+                        date=datetime.now().date(), # Default to today
+                        display_format='DD/MM/YYYY',
+                        className="mb-2 ms-auto" # Push to right if flex, or margin bottom
+                    )
+                ], className="d-flex justify-content-between align-items-center mb-2"),
+
+                # Aggregation Buttons
+                html.Div([
+                    dbc.Button("Daily", id="sales-agg-daily", className="me-1 btn-sm", n_clicks=0),
+                    dbc.Button("Weekly", id="sales-agg-weekly", className="me-1 btn-sm", n_clicks=0),
+                    dbc.Button("Monthly", id="sales-agg-monthly", className="me-1 btn-sm", n_clicks=0),
+                    dbc.Button("Yearly", id="sales-agg-yearly", className="btn-sm", n_clicks=0),
+                ], className="mb-3"),
+
+                # KPI Display
+                html.Div([
+                    html.H3(id='sales-total-kpi', className="display-5 fw-bold text-primary mb-0"),
+                    html.Small(id='sales-change-kpi', className="text-success")
+                ], className="d-flex flex-column align-items-start mb-3"),
 
                 dcc.Graph(id='total-sales-over-time-chart', figure={})
-            ]), className="h-100" # Ensure card takes full height of its column
+            ]), className="h-100"
         ), md=6
     ),
     dbc.Col(
         dbc.Card(
             dbc.CardBody([
-                html.Div("Profit Data", className="mb-2 fs-5 fw-bold text-success"), # Title for Profit Data
-                dbc.Button("Daily", id="profit-agg-daily", className="me-1", n_clicks=0),
-                dbc.Button("Weekly", id="profit-agg-weekly", className="me-1", n_clicks=0),
-                dbc.Button("Monthly", id="profit-agg-monthly", className="me-1", n_clicks=0),
-                dbc.Button("Yearly", id="profit-agg-yearly", n_clicks=0),
-
-                # KPI Display for Profit
+                html.Div("Profit Data", className="mb-4 fs-5 fw-bold text-success"), # Spacer to align with Sales card
+                
+                # We reuse the buttons/picker from the Sales card to control both, 
+                # or you can duplicate them here if you want independent control. 
+                # For this UI, the left controls typically drive both for comparison.
                 html.Div([
-                    html.H3(id='profit-total-kpi', className="display-5 fw-bold text-success mb-0"), # Main total
-                    html.Small(id='profit-change-kpi', className="text-success") # Percentage change
-                ], className="d-flex flex-column align-items-start my-3"),
+                    dbc.Button("Daily", id="profit-agg-daily", className="me-1 btn-sm", n_clicks=0),
+                    dbc.Button("Weekly", id="profit-agg-weekly", className="me-1 btn-sm", n_clicks=0),
+                    dbc.Button("Monthly", id="profit-agg-monthly", className="me-1 btn-sm", n_clicks=0),
+                    dbc.Button("Yearly", id="profit-agg-yearly", className="btn-sm", n_clicks=0),
+                ], className="mb-3"),
+
+                html.Div([
+                    html.H3(id='profit-total-kpi', className="display-5 fw-bold text-success mb-0"),
+                    html.Small(id='profit-change-kpi', className="text-success")
+                ], className="d-flex flex-column align-items-start mb-3"),
 
                 dcc.Graph(id='total-profit-over-time-chart', figure={})
             ]), className="h-100"
@@ -2936,14 +2958,16 @@ def update_profit_agg_state(d, w, m, y, current_state):
     return current_state
 
 # Callback to update Sales and Profit charts with Corrected Logic & Sustainability Look
+# --- Updated Callback with Date Picker Logic ---
 @app.callback(
     Output('total-sales-over-time-chart', 'figure'),
     Output('total-profit-over-time-chart', 'figure'),
     Input('stored-data', 'data'),
     Input('sales-time-agg-state', 'data'),
-    Input('profit-time-agg-state', 'data')
+    Input('profit-time-agg-state', 'data'),
+    Input('sales-trend-date-picker', 'date') # <-- NEW INPUT
 )
-def update_sales_and_profit_charts(stored_data_json, sales_time_agg, profit_time_agg):
+def update_sales_and_profit_charts(stored_data_json, sales_time_agg, profit_time_agg, selected_date):
     if stored_data_json is None or 'sales' not in stored_data_json:
         return {}, {}
 
@@ -2954,27 +2978,63 @@ def update_sales_and_profit_charts(stored_data_json, sales_time_agg, profit_time
     if df_sales.empty:
         return {}, {}
 
-    # --- Helper to Create Chart ---
+    # Handle Date Picker Input (Default to Today if None)
+    if selected_date:
+        anchor_date = pd.to_datetime(selected_date).date()
+    else:
+        anchor_date = datetime.now().date()
+
+    # --- Helper to Filter Data & Create Chart ---
     def create_trend_chart(df, time_agg, value_col, title, line_color='#2eda78'):
-        agg_df = aggregate_data(df, time_agg, 'SaleDate', value_col)
+        agg_df = pd.DataFrame()
         
-        # Determine X-Axis Format based on view
-        tick_format = "%d %b" # Default (e.g., 01 Jan)
-        if time_agg == 'Yearly':
-            tick_format = "%b" # Month Name (Jan, Feb)
-        elif time_agg == 'Daily':
-            tick_format = "%H:%M" # Hour (if time exists)
-        
+        # 1. Filter Logic based on Anchor Date
+        if time_agg == 'Daily':
+            # Show ONLY the selected date
+            # (If your data has times, this shows the hourly trend. If only dates, it shows 1 point)
+            agg_df = df[df['SaleDate'].dt.date == anchor_date].copy()
+            # If empty (no sales on selected day), chart remains empty (correct behavior)
+            agg_df = agg_df.groupby('SaleDate')[value_col].sum().reset_index()
+            agg_df.rename(columns={'SaleDate': 'Date'}, inplace=True)
+            tick_format = "%H:%M" # Assume hourly if data allows
+
+        elif time_agg == 'Weekly':
+            # Show 7 days ENDING on selected date
+            start_date = pd.to_datetime(anchor_date) - timedelta(days=6)
+            mask = (df['SaleDate'] >= start_date) & (df['SaleDate'].dt.date <= anchor_date)
+            filtered_df = df[mask].copy()
+            agg_df = filtered_df.groupby('SaleDate')[value_col].sum().reset_index()
+            agg_df.rename(columns={'SaleDate': 'Date'}, inplace=True)
+            tick_format = "%d %b" # e.g. 04 Feb
+
+        elif time_agg == 'Monthly':
+            # Show the FULL month of the selected date
+            mask = (df['SaleDate'].dt.month == anchor_date.month) & (df['SaleDate'].dt.year == anchor_date.year)
+            filtered_df = df[mask].copy()
+            agg_df = filtered_df.groupby('SaleDate')[value_col].sum().reset_index()
+            agg_df.rename(columns={'SaleDate': 'Date'}, inplace=True)
+            tick_format = "%d %b"
+
+        elif time_agg == 'Yearly':
+            # Show the FULL year of the selected date
+            mask = (df['SaleDate'].dt.year == anchor_date.year)
+            filtered_df = df[mask].copy()
+            # Group by Month for yearly view
+            filtered_df['MonthPeriod'] = filtered_df['SaleDate'].dt.to_period('M').dt.to_timestamp()
+            agg_df = filtered_df.groupby('MonthPeriod')[value_col].sum().reset_index()
+            agg_df.rename(columns={'MonthPeriod': 'Date'}, inplace=True)
+            tick_format = "%b" # Jan, Feb...
+
+        # 2. Build Figure
         fig = {
             'data': [
                 go.Scatter(
                     x=agg_df['Date'],
                     y=agg_df[value_col],
-                    mode='lines+markers' if len(agg_df) < 2 else 'lines', # Show dots if only 1 point (Daily)
+                    mode='lines+markers' if len(agg_df) < 2 else 'lines',
                     fill='tozeroy',
-                    # SUSTAINABILITY STYLE: Spline shape, Bright Green, Faint Fill
                     line=dict(color=line_color, width=4, shape='spline'),
-                    fillcolor='rgba(46, 218, 120, 0.05)', 
+                    fillcolor='rgba(46, 218, 120, 0.05)',
                     name=title
                 )
             ],
@@ -2985,18 +3045,13 @@ def update_sales_and_profit_charts(stored_data_json, sales_time_agg, profit_time
                 },
                 'xaxis': {
                     'tickformat': tick_format,
-                    'showgrid': False, 
-                    'showline': False, 
-                    'zeroline': False,
+                    'showgrid': False, 'showline': False, 'zeroline': False,
                     'tickfont': {'color': '#adb5bd', 'size': 11, 'weight': 'bold'},
                     'fixedrange': True
                 },
                 'yaxis': {
-                    'showgrid': False, 
-                    'showline': False, 
-                    'zeroline': False,
-                    'showticklabels': False, 
-                    'fixedrange': True
+                    'showgrid': False, 'showline': False, 'zeroline': False,
+                    'showticklabels': False, 'fixedrange': True
                 },
                 'plot_bgcolor': 'white',
                 'paper_bgcolor': 'white',
@@ -3708,6 +3763,7 @@ def update_sustainability_trends(btn_w, btn_m, btn_y):
     
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
