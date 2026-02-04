@@ -910,11 +910,10 @@ def display_page(pathname):
         page_layout = sales_trends_layout
         content_class = "content-container p-4"
 
-
     elif pathname == '/sustainability':
         page_layout = sustainability_layout
         # Use the custom class for the full-page grey background
-        content_class = "sustainability-content"
+        content_class = "sustainability-content p-4"
 
     
         
@@ -3659,4 +3658,5 @@ sustainability_layout = html.Div(className="sustainability-content p-4", childre
     
 if __name__ == '__main__':
     app.run(debug=True)
+
 
