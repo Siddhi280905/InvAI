@@ -2848,6 +2848,7 @@ def display_initial_carousel_item(current_index):
     return carousel_slide_content
 
 # Helper function to aggregate data based on time period and specified column names
+# --- Updated Data Aggregation Logic (Filtering) ---
 def aggregate_data(df, time_agg, date_col, value_col):
     if df.empty:
         return pd.DataFrame(columns=['Date', value_col])
@@ -2856,27 +2857,41 @@ def aggregate_data(df, time_agg, date_col, value_col):
         df[date_col] = pd.to_datetime(df[date_col], errors='coerce')
         df.dropna(subset=[date_col], inplace=True)
 
-    agg_df = pd.DataFrame() # Initialize agg_df
+    today = pd.to_datetime(datetime.now().date())
+    agg_df = pd.DataFrame()
 
     if time_agg == 'Daily':
-        agg_df = df.groupby(date_col)[value_col].sum().reset_index()
+        # Filter: Current Date Only
+        # Note: If your CSV only has dates (no times), this will return a single point. 
+        # If it has times, it will show the trend throughout the day.
+        agg_df = df[df[date_col].dt.date == today.date()].copy()
+        # If we have time data, we could group by hour here. 
+        # For now, we assume simple date-based rows.
+        agg_df = agg_df.groupby(date_col)[value_col].sum().reset_index()
+
     elif time_agg == 'Weekly':
-        agg_df = df.set_index(date_col).resample('W')[value_col].sum().reset_index()
-        # For weekly, we can just use the week number for cleaner labels, or a 'Week X' format
-        agg_df['WeekNum'] = agg_df[date_col].dt.isocalendar().week # Get ISO week number
-        agg_df['Year'] = agg_df[date_col].dt.year
-        # Combine year and week to ensure uniqueness across years, e.g., '2024-Week 1', '2025-Week 1'
-        agg_df[date_col] = agg_df['Year'].astype(str) + '-Week ' + agg_df['WeekNum'].astype(str)
-        agg_df = agg_df[[date_col, value_col]] # Keep only relevant columns
+        # Filter: Last 7 Days (Current Week view)
+        start_date = today - timedelta(days=6) # Today + 6 previous days
+        filtered_df = df[(df[date_col] >= start_date) & (df[date_col] <= today)].copy()
+        agg_df = filtered_df.groupby(date_col)[value_col].sum().reset_index()
 
     elif time_agg == 'Monthly':
-        agg_df = df.set_index(date_col).resample('M')[value_col].sum().reset_index()
-        agg_df[date_col] = agg_df[date_col].dt.strftime('%Y-%m') # Format for better monthly labels
-    elif time_agg == 'Yearly':
-        agg_df = df.set_index(date_col).resample('Y')[value_col].sum().reset_index()
-        agg_df[date_col] = agg_df[date_col].dt.strftime('%Y') # Format for better yearly labels
+        # Filter: Current Month Only (1st to Today)
+        filtered_df = df[(df[date_col].dt.month == today.month) & (df[date_col].dt.year == today.year)].copy()
+        agg_df = filtered_df.groupby(date_col)[value_col].sum().reset_index()
 
-    agg_df.rename(columns={date_col: 'Date'}, inplace=True)
+    elif time_agg == 'Yearly':
+        # Filter: Current Year Only
+        filtered_df = df[df[date_col].dt.year == today.year].copy()
+        # Group by Month for the Yearly view
+        filtered_df['MonthPeriod'] = filtered_df[date_col].dt.to_period('M').dt.to_timestamp()
+        agg_df = filtered_df.groupby('MonthPeriod')[value_col].sum().reset_index()
+        agg_df.rename(columns={'MonthPeriod': 'Date'}, inplace=True)
+
+    # Ensure column naming consistency
+    if 'Date' not in agg_df.columns and date_col in agg_df.columns:
+        agg_df.rename(columns={date_col: 'Date'}, inplace=True)
+        
     return agg_df
 
 
@@ -2920,8 +2935,7 @@ def update_profit_agg_state(d, w, m, y, current_state):
     elif button_id == 'profit-agg-yearly': return 'Yearly'
     return current_state
 
-# Callback to update Sales and Profit charts based on stored data and aggregation states
-# Callback to update Sales and Profit charts with Sustainability Look
+# Callback to update Sales and Profit charts with Corrected Logic & Sustainability Look
 @app.callback(
     Output('total-sales-over-time-chart', 'figure'),
     Output('total-profit-over-time-chart', 'figure'),
@@ -2940,106 +2954,65 @@ def update_sales_and_profit_charts(stored_data_json, sales_time_agg, profit_time
     if df_sales.empty:
         return {}, {}
 
-    # --- 1. Sales Chart Construction ---
-    sales_agg_df = aggregate_data(df_sales, sales_time_agg, 'SaleDate', 'TotalPrice')
-    
-    sales_fig = {
-        'data': [
-            go.Scatter(
-                x=sales_agg_df['Date'],
-                y=sales_agg_df['TotalPrice'],
-                mode='lines',
-                fill='tozeroy',
-                # SUSTAINABILITY STYLE: Spline shape, Bright Green, Faint Fill
-                line=dict(color='#2eda78', width=4, shape='spline'),
-                fillcolor='rgba(46, 218, 120, 0.05)', 
-                name='Total Sales'
-            )
-        ],
-        'layout': {
-            'title': {
-                'text': 'Overall Sales Growth',
-                'font': {'size': 16, 'color': '#6c757d', 'weight': 'bold'}
-            },
-            'xaxis': {
-                'tickmode': 'array',
-                'tickvals': sales_agg_df['Date'],
-                'ticktext': sales_agg_df['Date'],
-                # MINIMALIST AXIS STYLE
-                'showgrid': False, 
-                'showline': False, 
-                'zeroline': False,
-                'tickfont': {'color': '#adb5bd', 'size': 11, 'weight': 'bold'},
-                'fixedrange': True
-            },
-            'yaxis': {
-                # Hide Y-axis grid and labels to match the clean Sustainability look
-                'showgrid': False, 
-                'showline': False, 
-                'zeroline': False,
-                'showticklabels': False, 
-                'fixedrange': True
-            },
-            'plot_bgcolor': 'white',
-            'paper_bgcolor': 'white',
-            # Tight margins to maximize chart area
-            'margin': {'l': 0, 'r': 0, 't': 40, 'b': 20},
-            'height': 300,
-            'showlegend': False,
-            'hovermode': 'x unified'
+    # --- Helper to Create Chart ---
+    def create_trend_chart(df, time_agg, value_col, title, line_color='#2eda78'):
+        agg_df = aggregate_data(df, time_agg, 'SaleDate', value_col)
+        
+        # Determine X-Axis Format based on view
+        tick_format = "%d %b" # Default (e.g., 01 Jan)
+        if time_agg == 'Yearly':
+            tick_format = "%b" # Month Name (Jan, Feb)
+        elif time_agg == 'Daily':
+            tick_format = "%H:%M" # Hour (if time exists)
+        
+        fig = {
+            'data': [
+                go.Scatter(
+                    x=agg_df['Date'],
+                    y=agg_df[value_col],
+                    mode='lines+markers' if len(agg_df) < 2 else 'lines', # Show dots if only 1 point (Daily)
+                    fill='tozeroy',
+                    # SUSTAINABILITY STYLE: Spline shape, Bright Green, Faint Fill
+                    line=dict(color=line_color, width=4, shape='spline'),
+                    fillcolor='rgba(46, 218, 120, 0.05)', 
+                    name=title
+                )
+            ],
+            'layout': {
+                'title': {
+                    'text': title,
+                    'font': {'size': 16, 'color': '#6c757d', 'weight': 'bold'}
+                },
+                'xaxis': {
+                    'tickformat': tick_format,
+                    'showgrid': False, 
+                    'showline': False, 
+                    'zeroline': False,
+                    'tickfont': {'color': '#adb5bd', 'size': 11, 'weight': 'bold'},
+                    'fixedrange': True
+                },
+                'yaxis': {
+                    'showgrid': False, 
+                    'showline': False, 
+                    'zeroline': False,
+                    'showticklabels': False, 
+                    'fixedrange': True
+                },
+                'plot_bgcolor': 'white',
+                'paper_bgcolor': 'white',
+                'margin': {'l': 0, 'r': 0, 't': 40, 'b': 20},
+                'height': 300,
+                'showlegend': False,
+                'hovermode': 'x unified'
+            }
         }
-    }
+        return fig
 
-    # --- 2. Profit Chart Construction ---
-    profit_agg_df = aggregate_data(df_sales, profit_time_agg, 'SaleDate', 'Profit')
-    
-    profit_fig = {
-        'data': [
-            go.Scatter(
-                x=profit_agg_df['Date'],
-                y=profit_agg_df['Profit'],
-                mode='lines',
-                fill='tozeroy',
-                # SUSTAINABILITY STYLE: Spline shape, Bright Green, Faint Fill
-                line=dict(color='#2eda78', width=4, shape='spline'),
-                fillcolor='rgba(46, 218, 120, 0.05)',
-                name='Profit'
-            )
-        ],
-        'layout': {
-            'title': {
-                'text': 'Overall Profit Growth',
-                'font': {'size': 16, 'color': '#6c757d', 'weight': 'bold'}
-            },
-            'xaxis': {
-                'tickmode': 'array',
-                'tickvals': profit_agg_df['Date'],
-                'ticktext': profit_agg_df['Date'],
-                # MINIMALIST AXIS STYLE
-                'showgrid': False, 
-                'showline': False, 
-                'zeroline': False,
-                'tickfont': {'color': '#adb5bd', 'size': 11, 'weight': 'bold'},
-                'fixedrange': True
-            },
-            'yaxis': {
-                'showgrid': False, 
-                'showline': False, 
-                'zeroline': False,
-                'showticklabels': False,
-                'fixedrange': True
-            },
-            'plot_bgcolor': 'white',
-            'paper_bgcolor': 'white',
-            'margin': {'l': 0, 'r': 0, 't': 40, 'b': 20},
-            'height': 300,
-            'showlegend': False,
-            'hovermode': 'x unified'
-        }
-    }
+    # Create Charts
+    sales_fig = create_trend_chart(df_sales, sales_time_agg, 'TotalPrice', 'Overall Sales Growth')
+    profit_fig = create_trend_chart(df_sales, profit_time_agg, 'Profit', 'Overall Profit Growth')
 
     return sales_fig, profit_fig
-
 
 @app.callback(
     Output('sales-total-kpi', 'children'),
@@ -3735,6 +3708,7 @@ def update_sustainability_trends(btn_w, btn_m, btn_y):
     
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
