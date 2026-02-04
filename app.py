@@ -3535,7 +3535,7 @@ sustainability_layout = html.Div(className="sustainability-content p-4", childre
                         dbc.Badge("-8.4% vs prev. period", color="danger", className="p-2", style={'backgroundColor': '#f8d7da', 'color': '#dc3545', 'fontWeight': '600'})
                     ]),
                     # Plotly Chart (Dummy Data)
-                    dcc.Graph(figure=get_dummy_sustainability_chart(), config={'displayModeBar': False})
+                    dcc.Graph(figure=get_sustainability_chart(), config={'displayModeBar': False})
                 ]),
                 # Right Col: Waste by Material
                 dbc.Col(md=4, className="ps-md-5 border-start", children=[
@@ -3684,6 +3684,7 @@ sustainability_layout = html.Div(className="sustainability-content p-4", childre
     
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
