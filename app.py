@@ -3443,76 +3443,69 @@ def get_sustainability_chart():
     )
     return fig
 
-# --- Sustainability Tracker Page Layout ---
+# --- Sustainability Layout Definition ---
 sustainability_layout = html.Div(className="sustainability-content p-4", children=[
-    # 1. Header Section
+    
+    # 1. Header
     dbc.Row(className="mb-4 align-items-center", children=[
-        dbc.Col(md=8, children=[
-            html.H2("Sustainability Tracker", className="fw-bold mb-1"),
-            html.P("Real-time environmental impact analysis and AI-driven reduction strategies.", className="text-muted mb-0")
-        ]),
-        dbc.Col(md=4, className="d-flex justify-content-end gap-2", children=[
-            dbc.Button([html.I(className="bi bi-share me-2"), "Share"], color="light", className="sus-header-btn border"),
+        dbc.Col([
+            html.H2("Sustainability Tracker", className="fw-bolder mb-1"),
+            html.P("Real-time environmental impact analysis and AI-driven reduction strategies.", className="text-muted")
+        ], md=8),
+        dbc.Col([
+            dbc.Button([html.I(className="bi bi-share me-2"), "Share"], color="light", className="sus-header-btn me-2 border"),
             dbc.Button([html.I(className="bi bi-download me-2"), "Download Report"], color="success", className="sus-header-btn")
-        ])
+        ], md=4, className="d-flex justify-content-end")
     ]),
 
-    # 2. Top Metrics Cards Section
-    dbc.Row(className="mb-4 g-3", children=[
-        # Card 1: Current Carbon Footprint
+    # 2. Top Metrics (3 Cards)
+    dbc.Row(className="mb-4 g-4", children=[
+        # Card 1: Carbon Footprint
         dbc.Col(md=4, children=[
-            dbc.Card(className="sus-card", children=[
-                dbc.CardBody(className="sus-card-body position-relative overflow-hidden", children=[
-                    html.Div(className="metric-title-sus", children="CURRENT CARBON FOOTPRINT"),
-                    # Background CO2 watermark effect
-                    html.Div("CO₂", style={'position': 'absolute', 'top': '-10px', 'right': '10px', 'fontSize': '6rem', 'fontWeight': '900', 'color': '#f4f7f6', 'zIndex': 0, 'pointerEvents': 'none'}),
-                    html.Div(style={'zIndex': 1, 'position': 'relative'}, children=[
-                         html.Div([
-                            html.Span("42.5 tons", className="metric-value-sus"),
-                            html.Span(" CO2e", className="text-muted fs-5 ms-1")
-                        ]),
-                        html.Div(className="trend-badge-sus trend-down mt-2", children=[
-                            html.I(className="bi bi-arrow-down-right me-1"),
-                            "-12% from last month"
-                        ])
-                    ])
+            dbc.Card(className="sus-card border-2 border-success border-opacity-25", style={'backgroundColor': '#f0fdf4'}, children=[ # Light green bg hint
+                dbc.CardBody(className="sus-card-body position-relative", children=[
+                    html.Div("CO₂", className="co2-watermark"), # Watermark
+                    html.Div("CURRENT CARBON FOOTPRINT", className="metric-title-sus text-success"),
+                    html.Div([
+                        html.Span("42.5 tons", className="metric-value-sus"),
+                        html.Span(" CO2e", className="fs-5 text-muted ms-1")
+                    ], className="position-relative", style={'zIndex': '1'}),
+                    html.Div([
+                        html.I(className="bi bi-graph-down-arrow me-2"), " -12% from last month"
+                    ], className="text-danger fw-bold mt-2")
                 ])
             ])
         ]),
         # Card 2: Waste Diverted
         dbc.Col(md=4, children=[
             dbc.Card(className="sus-card", children=[
-                 dbc.CardBody(className="sus-card-body", children=[
-                    html.Div(className="metric-title-sus", children="WASTE DIVERTED"),
+                dbc.CardBody(className="sus-card-body", children=[
+                    html.Div("WASTE DIVERTED", className="metric-title-sus"),
+                    html.Div("12.8 tons", className="metric-value-sus"),
                     html.Div([
-                        html.Span("12.8 tons", className="metric-value-sus")
-                    ]),
-                    html.Div(className="trend-badge-sus trend-up mt-2", children=[
-                        html.I(className="bi bi-arrow-up-right me-1"),
-                        "+5% target pace"
-                    ])
+                        html.I(className="bi bi-graph-up-arrow me-2"), " +5% target pace"
+                    ], className="text-success fw-bold mt-2")
                 ])
             ])
         ]),
         # Card 3: Sustainability Score
         dbc.Col(md=4, children=[
             dbc.Card(className="sus-card", children=[
-                 dbc.CardBody(className="sus-card-body", children=[
-                    html.Div(className="metric-title-sus", children="SUSTAINABILITY SCORE"),
-                    html.Div(className="d-flex align-items-center justify-content-between", children=[
-                         html.Span("88/100", className="metric-value-sus"),
-                         # Custom Mini Progress bar next to score
-                         html.Div(className="sus-progress-container", style={'width': '100px'}, children=[
-                             html.Div(className="sus-progress-bar", style={'width': '88%'})
-                         ])
+                dbc.CardBody(className="sus-card-body", children=[
+                    html.Div("SUSTAINABILITY SCORE", className="metric-title-sus"),
+                    dbc.Row([
+                        dbc.Col(html.Div("88/100", className="metric-value-sus"), width="auto"),
+                        dbc.Col(html.Div(className="sus-progress-container mt-3", children=[
+                            html.Div(className="sus-progress-bar", style={'width': '88%'})
+                        ]))
                     ]),
-                    html.P("Top 5% in your industry", className="text-muted mt-2 mb-0 fw-semibold")
+                    html.Div("Top 5% in your industry", className="text-success fw-bold mt-2")
                 ])
             ])
         ]),
     ]),
 
-    # 3. Trends & Materials Section (UPDATED WITH IDs)
+    # 3. Trends & Materials Section (With Interactive Buttons)
     dbc.Card(className="sus-card mb-4", children=[
         dbc.CardBody(className="p-4", children=[
             dbc.Row([
@@ -3524,7 +3517,6 @@ sustainability_layout = html.Div(className="sustainability-content p-4", childre
                             html.P("Comparing physical waste volume against sustainability targets.", className="text-muted small")
                         ]),
                         dbc.Col([
-                            # UPDATED BUTTON GROUP WITH IDs
                             dbc.ButtonGroup([
                                 dbc.Button("Weekly", id="sus-btn-weekly", color="light", className="fw-bold border", n_clicks=0),
                                 dbc.Button("Monthly", id="sus-btn-monthly", color="light", className="fw-bold border", n_clicks=0),
@@ -3532,18 +3524,17 @@ sustainability_layout = html.Div(className="sustainability-content p-4", childre
                             ], size="sm")
                         ], className="text-end")
                     ]),
-                    # UPDATED METRICS WITH IDs
                     html.Div([
                         html.Span("2,450 kg", id="sus-total-waste", className="display-6 fw-bold me-3"),
                         dbc.Badge("-8.4% vs prev. period", id="sus-trend-badge", color="danger", className="p-2 opacity-75")
                     ], className="mt-3 mb-2"),
-                    # UPDATED GRAPH WITH ID
                     dcc.Graph(id="sus-trend-graph", config={'displayModeBar': False})
                 ]),
                 
-                # Right: Material Breakdown (Unchanged)
+                # Right: Material Breakdown
                 dbc.Col(md=4, className="ps-md-5 pt-3", children=[
                     html.H6("WASTE BY MATERIAL", className="metric-title-sus mb-4"),
+                    
                     html.Div(className="mb-4", children=[
                         html.Div(["Plastic", html.Span("42%", className="float-end fw-bold")], className="mb-1 fw-bold font-monospace small"),
                         html.Div(className="sus-progress-container", children=[html.Div(className="sus-progress-bar", style={'width': '42%'})])
@@ -3560,98 +3551,98 @@ sustainability_layout = html.Div(className="sustainability-content p-4", childre
                         html.Div(["Metal", html.Span("12%", className="float-end fw-bold")], className="mb-1 fw-bold font-monospace small"),
                         html.Div(className="sus-progress-container", children=[html.Div(className="sus-progress-bar", style={'width': '12%'})])
                     ]),
+                    
                     html.A([html.I(className="bi bi-arrow-right"), " View Full Analytics"], href="#", className="text-success fw-bold text-decoration-none small")
                 ])
             ])
         ])
     ]),
-    
-    # 4. AI-Powered Sustainability Tips
-    html.Div(className="mb-4", children=[
-        html.H4([html.I(className="bi bi-stars me-2 text-success"), "AI-Powered Sustainability Tips"], className="fw-bold mb-4"),
-        dbc.Row(className="g-3", children=[
-            # Tip Card 1
+
+    # 4. AI Tips
+    html.Div([
+        html.H4([html.I(className="bi bi-stars text-success me-2"), "AI-Powered Sustainability Tips"], className="fw-bold mb-4"),
+        dbc.Row(className="g-4", children=[
+            # Tip 1
             dbc.Col(md=4, children=[
                 dbc.Card(className="sus-card ai-tip-card", children=[
-                    dbc.CardBody(className="p-4", children=[
-                        html.Div(className="d-flex justify-content-between mb-3", children=[
-                            html.I(className="bi bi-truck tip-icon-container"),
-                            html.Span("HIGH IMPACT", className="tip-badge badge-high-impact")
-                        ]),
-                        html.H5("Route Optimization", className="tip-title"),
-                        html.P("AI detected that consolidating shipments from Supplier B could reduce transport emissions by 14.2% monthly.", className="tip-text"),
+                    dbc.CardBody([
+                        html.Div([html.I(className="bi bi-truck fs-4 text-success"), html.Span("HIGH IMPACT", className="tip-badge badge-high-impact float-end")]),
+                        html.H6("Route Optimization", className="fw-bold mt-3"),
+                        html.P("AI detected that consolidating shipments from Supplier B could reduce transport emissions by 14.2% monthly.", className="text-muted small mt-2"),
                         dbc.Button("Apply Optimization", className="tip-button")
                     ])
                 ])
             ]),
-             # Tip Card 2
+            # Tip 2
             dbc.Col(md=4, children=[
                 dbc.Card(className="sus-card ai-tip-card", children=[
-                    dbc.CardBody(className="p-4", children=[
-                        html.Div(className="d-flex justify-content-between mb-3", children=[
-                            html.I(className="bi bi-box-seam tip-icon-container"),
-                            html.Span("SUPPLY CHAIN", className="tip-badge badge-supply-chain")
-                        ]),
-                        html.H5("Packaging Upgrade", className="tip-title"),
-                        html.P("Switching to biodegradable filler for SKU group \"Electronics\" would divert 450kg of plastic from landfills annually.", className="tip-text"),
+                    dbc.CardBody([
+                        html.Div([html.I(className="bi bi-box-seam fs-4 text-success"), html.Span("SUPPLY CHAIN", className="tip-badge badge-supply-chain float-end")]),
+                        html.H6("Packaging Upgrade", className="fw-bold mt-3"),
+                        html.P("Switching to biodegradable filler for SKU group \"Electronics\" would divert 450kg of plastic from landfills annually.", className="text-muted small mt-2"),
                         dbc.Button("View Suppliers", className="tip-button")
                     ])
                 ])
             ]),
-             # Tip Card 3
+            # Tip 3
             dbc.Col(md=4, children=[
                 dbc.Card(className="sus-card ai-tip-card", children=[
-                    dbc.CardBody(className="p-4", children=[
-                        html.Div(className="d-flex justify-content-between mb-3", children=[
-                            html.I(className="bi bi-lightning-charge tip-icon-container"), # Changed icon to lightning
-                            html.Span("OPERATIONAL", className="tip-badge badge-operational")
-                        ]),
-                        html.H5("Energy Efficiency", className="tip-title"),
-                        html.P("Inventory turnover is highest between 10 AM and 2 PM. Adjust warehouse climate controls outside these peak hours.", className="tip-text"),
+                    dbc.CardBody([
+                        html.Div([html.I(className="bi bi-lightning-charge fs-4 text-success"), html.Span("OPERATIONAL", className="tip-badge badge-operational float-end")]),
+                        html.H6("Energy Efficiency", className="fw-bold mt-3"),
+                        html.P("Inventory turnover is highest between 10 AM and 2 PM. Adjust warehouse climate controls outside these peak hours.", className="text-muted small mt-2"),
                         dbc.Button("Setup Schedule", className="tip-button")
                     ])
                 ])
             ]),
         ])
-    ]),
+    ], className="mb-5"),
 
-    # 5. Inventory Waste Leaders Table
+    # 5. Waste Leaders Table
     dbc.Card(className="sus-card mb-5", children=[
-        dbc.CardBody(className="p-4", children=[
-             html.H5("Inventory Waste Leaders", className="fw-bold mb-4"),
-             dash_table.DataTable(
+        dbc.CardBody([
+            html.H5("Inventory Waste Leaders", className="fw-bold mb-4 ps-3"),
+            dash_table.DataTable(
                 id='waste-leaders-table',
                 columns=[
-                    {'name': 'PRODUCT ITEM', 'id': 'PRODUCT ITEM'},
-                    {'name': 'CATEGORY', 'id': 'CATEGORY'},
-                    {'name': 'WASTE MASS', 'id': 'WASTE MASS'},
-                    {'name': 'IMPACT SCORE', 'id': 'IMPACT SCORE', 'presentation': 'markdown'},
-                    {'name': 'ACTION', 'id': 'ACTION', 'presentation': 'markdown'},
+                    {'name': 'PRODUCT ITEM', 'id': 'item'},
+                    {'name': 'CATEGORY', 'id': 'cat'},
+                    {'name': 'WASTE MASS', 'id': 'mass'},
+                    {'name': 'IMPACT SCORE', 'id': 'score'},
+                    {'name': 'ACTION', 'id': 'action'},
                 ],
                 data=[
-                    # Dummy data matching image
-                    {'PRODUCT ITEM': 'Eco-Poly Packaging Film', 'CATEGORY': 'Packaging', 'WASTE MASS': '842 kg', 'IMPACT SCORE': 'CRITICAL', 'ACTION': 'Mitigate'},
-                    {'PRODUCT ITEM': 'Standard A4 Printer Paper', 'CATEGORY': 'Office Supplies', 'WASTE MASS': '215 kg', 'IMPACT SCORE': 'MODERATE', 'ACTION': 'Mitigate'},
-                    {'PRODUCT ITEM': 'Organic Cotton T-Shirts (Defective)', 'CATEGORY': 'Apparel', 'WASTE MASS': '112 kg', 'IMPACT SCORE': 'LOW', 'ACTION': 'Mitigate'},
+                    {'item': 'Eco-Poly Packaging Film', 'cat': 'Packaging', 'mass': '842 kg', 'score': 'CRITICAL', 'action': 'Mitigate'},
+                    {'item': 'Standard A4 Printer Paper', 'cat': 'Office Supplies', 'mass': '215 kg', 'score': 'MODERATE', 'action': 'Mitigate'},
+                    {'item': 'Organic Cotton T-Shirts (Defective)', 'cat': 'Apparel', 'mass': '112 kg', 'score': 'LOW', 'action': 'Mitigate'},
                 ],
                 style_table={'overflowX': 'auto'},
-                # Conditional formatting for badges based on cell value
                 style_data_conditional=[
-                     {'if': {'column_id': 'CATEGORY'}, 'color': 'var(--sus-green-primary)', 'fontWeight': '600'},
-                     {'if': {'filter_query': '{IMPACT SCORE} = "CRITICAL"', 'column_id': 'IMPACT SCORE'}, 'backgroundColor': '#f8d7da', 'color': '#842029', 'fontWeight': '700', 'fontSize': '0.75rem', 'borderRadius': '12px', 'padding': '4px 12px', 'textTransform': 'uppercase', 'display': 'inline-block', 'width': 'auto', 'margin': 'auto'},
-                     {'if': {'filter_query': '{IMPACT SCORE} = "MODERATE"', 'column_id': 'IMPACT SCORE'}, 'backgroundColor': '#fff3cd', 'color': '#664d03', 'fontWeight': '700', 'fontSize': '0.75rem', 'borderRadius': '12px', 'padding': '4px 12px', 'textTransform': 'uppercase', 'display': 'inline-block', 'width': 'auto', 'margin': 'auto'},
-                     {'if': {'filter_query': '{IMPACT SCORE} = "LOW"', 'column_id': 'IMPACT SCORE'}, 'backgroundColor': '#d1e7dd', 'color': '#0f5132', 'fontWeight': '700', 'fontSize': '0.75rem', 'borderRadius': '12px', 'padding': '4px 12px', 'textTransform': 'uppercase', 'display': 'inline-block', 'width': 'auto', 'margin': 'auto'},
-                     {'if': {'column_id': 'ACTION'}, 'color': 'var(--sus-green-accent)', 'fontWeight': '700', 'cursor': 'pointer', 'textAlign': 'right'},
-                     # Center align the badge cells
-                     {'if': {'column_id': 'IMPACT SCORE'}, 'textAlign': 'center'},
-                ],
-                 # Hide default header styles to use custom ones defined in CSS
-                 css=[{"selector": ".dash-header", "rule": "border-bottom: none; box-shadow: none;"}]
-             ]
+                    {'if': {'column_id': 'cat'}, 'color': '#2eda78', 'fontWeight': '600'},
+                    {'if': {'column_id': 'action'}, 'color': '#28a745', 'fontWeight': 'bold', 'cursor': 'pointer', 'textAlign': 'right'},
+                    
+                    # Badges Logic
+                    {'if': {'filter_query': '{score} = "CRITICAL"', 'column_id': 'score'}, 
+                     'backgroundColor': '#ffe5e5', 'color': '#c92a2a', 'fontWeight': '800', 'borderRadius': '4px', 'padding': '5px', 'fontSize': '0.7rem'},
+                    
+                    {'if': {'filter_query': '{score} = "MODERATE"', 'column_id': 'score'}, 
+                     'backgroundColor': '#fff3bf', 'color': '#f08c00', 'fontWeight': '800', 'borderRadius': '4px', 'padding': '5px', 'fontSize': '0.7rem'},
+
+                    {'if': {'filter_query': '{score} = "LOW"', 'column_id': 'score'}, 
+                     'backgroundColor': '#d3f9d8', 'color': '#2b8a3e', 'fontWeight': '800', 'borderRadius': '4px', 'padding': '5px', 'fontSize': '0.7rem'},
+                ]
             )
         ])
     ]),
 
+    # Footer
+    html.Div(className="text-center text-muted small py-4", children=[
+        html.Span("GreenInventory Sustainability"),
+        html.Span("Compliance", className="ms-4 cursor-pointer"),
+        html.Span("API Docs", className="ms-3 cursor-pointer"),
+        html.Span("Support", className="ms-3 cursor-pointer"),
+    ])
+])
 
 # --- Callback for Sustainability Trends Chart Switching ---
 @app.callback(
@@ -3723,6 +3714,7 @@ def update_sustainability_trends(btn_w, btn_m, btn_y):
     
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
