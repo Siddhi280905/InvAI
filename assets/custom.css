@@ -1206,4 +1206,160 @@ html, body {
 .btn-outline-primary:hover {
     background-color: #28a745;
     color: white;
+
+}
+
+
+
+/* =========================================
+   SUSTAINABILITY TRACKER PAGE STYLES
+   ========================================= */
+
+:root {
+    --sus-green-dark: #004d25;
+    --sus-green-primary: #198754;
+    --sus-green-accent: #28a745; 
+    --sus-bg-light: #f4f7f6;
+}
+
+/* Page Background Overrides */
+.sustainability-content {
+    background-color: var(--sus-bg-light);
+    min-height: 100vh;
+    padding: 1.5rem;
+}
+
+/* Custom Card Styling - High Border Radius & Shadow */
+.sus-card {
+    border: none !important;
+    border-radius: 16px !important; /* The distinct rounded look */
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03) !important;
+    background-color: #fff !important;
+    height: 100%;
+}
+
+.sus-card-body {
+    padding: 1.5rem;
+}
+
+/* Header Buttons */
+.sus-header-btn {
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    padding: 0.6rem 1.2rem !important;
+}
+
+/* Top Metrics Typography */
+.metric-title-sus {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 1rem;
+}
+
+.metric-value-sus {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #212529;
+    line-height: 1.2;
+}
+
+/* The "CO2" Background Watermark */
+.co2-watermark {
+    position: absolute;
+    top: -10px;
+    right: 15px;
+    font-size: 5rem;
+    font-weight: 900;
+    color: #198754; /* Green tint */
+    opacity: 0.1;   /* Very faint */
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Custom Progress Bars (Thicker, Rounded) */
+.sus-progress-container {
+    height: 8px;
+    background-color: #f1f3f5;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 8px;
+}
+
+.sus-progress-bar {
+    height: 100%;
+    background-color: #2eda78; /* Bright green from design */
+    border-radius: 4px;
+}
+
+/* AI Tips Section Cards */
+.ai-tip-card {
+    border: 1px solid #f1f3f5 !important;
+    transition: transform 0.2s;
+}
+
+.ai-tip-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05) !important;
+}
+
+/* AI Tip Badges */
+.tip-badge {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    border-radius: 6px;
+}
+
+.badge-high-impact { background-color: #28a745; color: white; }
+.badge-supply-chain { background-color: #e6f9ed; color: #198754; }
+.badge-operational { background-color: #e9ecef; color: #495057; }
+
+/* AI Tip Buttons */
+.tip-button {
+    width: 100%;
+    background-color: #f8f9fa !important;
+    color: #212529 !important;
+    border: none !important;
+    font-weight: 700 !important;
+    padding: 0.8rem !important;
+    margin-top: 1rem;
+    transition: background-color 0.2s;
+}
+
+.tip-button:hover {
+    background-color: #e9ecef !important;
+}
+
+/* --- Waste Leaders Table Customization --- */
+
+/* Remove default Dash borders for a cleaner look */
+#waste-leaders-table .dash-header {
+    background-color: #fff !important;
+    color: #adb5bd !important;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-bottom: 1px solid #f1f3f5 !important;
+    border-top: none !important;
+    text-align: left !important;
+    padding-left: 1.5rem !important;
+}
+
+#waste-leaders-table .dash-cell {
+    border-bottom: 1px solid #f8f9fa !important;
+    border-left: none !important;
+    border-right: none !important;
+    padding: 1.2rem 1.5rem !important;
+    font-size: 0.95rem;
+    vertical-align: middle;
+}
+
+/* Fix for the Action Link to look like a text button */
+#waste-leaders-table .dash-cell-value {
+    display: flex; /* Helps align badges */
+    align-items: center;
 }
