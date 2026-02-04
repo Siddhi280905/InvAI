@@ -2921,12 +2921,13 @@ def update_profit_agg_state(d, w, m, y, current_state):
     return current_state
 
 # Callback to update Sales and Profit charts based on stored data and aggregation states
+# Callback to update Sales and Profit charts with Sustainability Look
 @app.callback(
     Output('total-sales-over-time-chart', 'figure'),
     Output('total-profit-over-time-chart', 'figure'),
-    Input('stored-data', 'data'), # Data from dcc.Store
-    Input('sales-time-agg-state', 'data'), # <-- NEW: Get state from dcc.Store
-    Input('profit-time-agg-state', 'data') # <-- NEW: Get state from dcc.Store
+    Input('stored-data', 'data'),
+    Input('sales-time-agg-state', 'data'),
+    Input('profit-time-agg-state', 'data')
 )
 def update_sales_and_profit_charts(stored_data_json, sales_time_agg, profit_time_agg):
     if stored_data_json is None or 'sales' not in stored_data_json:
@@ -2939,8 +2940,9 @@ def update_sales_and_profit_charts(stored_data_json, sales_time_agg, profit_time
     if df_sales.empty:
         return {}, {}
 
-    # Sales Chart Logic:
+    # --- 1. Sales Chart Construction ---
     sales_agg_df = aggregate_data(df_sales, sales_time_agg, 'SaleDate', 'TotalPrice')
+    
     sales_fig = {
         'data': [
             go.Scatter(
@@ -2948,38 +2950,49 @@ def update_sales_and_profit_charts(stored_data_json, sales_time_agg, profit_time
                 y=sales_agg_df['TotalPrice'],
                 mode='lines',
                 fill='tozeroy',
-                line=dict(color='#198754'), # Green line color
+                # SUSTAINABILITY STYLE: Spline shape, Bright Green, Faint Fill
+                line=dict(color='#2eda78', width=4, shape='spline'),
+                fillcolor='rgba(46, 218, 120, 0.05)', 
                 name='Total Sales'
             )
         ],
         'layout': {
             'title': {
                 'text': 'Overall Sales Growth',
-                'font': {'size': 18, 'color': '#333'}
+                'font': {'size': 16, 'color': '#6c757d', 'weight': 'bold'}
             },
             'xaxis': {
-                'title': 'Time Period',
                 'tickmode': 'array',
                 'tickvals': sales_agg_df['Date'],
                 'ticktext': sales_agg_df['Date'],
-                'showgrid': False,
-                'zeroline': False
+                # MINIMALIST AXIS STYLE
+                'showgrid': False, 
+                'showline': False, 
+                'zeroline': False,
+                'tickfont': {'color': '#adb5bd', 'size': 11, 'weight': 'bold'},
+                'fixedrange': True
             },
             'yaxis': {
-                'title': 'Sales Amount',
-                'showgrid': False,
-                'zeroline': False
+                # Hide Y-axis grid and labels to match the clean Sustainability look
+                'showgrid': False, 
+                'showline': False, 
+                'zeroline': False,
+                'showticklabels': False, 
+                'fixedrange': True
             },
-            'plot_bgcolor': '#f8f9fa',
-            'paper_bgcolor': '#fff',
-            'margin': {'l': 40, 'r': 20, 't': 60, 'b': 30},
-            'height': 250,
-            'showlegend': False
+            'plot_bgcolor': 'white',
+            'paper_bgcolor': 'white',
+            # Tight margins to maximize chart area
+            'margin': {'l': 0, 'r': 0, 't': 40, 'b': 20},
+            'height': 300,
+            'showlegend': False,
+            'hovermode': 'x unified'
         }
     }
 
-    # Profit Chart Logic:
+    # --- 2. Profit Chart Construction ---
     profit_agg_df = aggregate_data(df_sales, profit_time_agg, 'SaleDate', 'Profit')
+    
     profit_fig = {
         'data': [
             go.Scatter(
@@ -2987,33 +3000,41 @@ def update_sales_and_profit_charts(stored_data_json, sales_time_agg, profit_time
                 y=profit_agg_df['Profit'],
                 mode='lines',
                 fill='tozeroy',
-                line=dict(color='#198754'),
+                # SUSTAINABILITY STYLE: Spline shape, Bright Green, Faint Fill
+                line=dict(color='#2eda78', width=4, shape='spline'),
+                fillcolor='rgba(46, 218, 120, 0.05)',
                 name='Profit'
             )
         ],
         'layout': {
             'title': {
                 'text': 'Overall Profit Growth',
-                'font': {'size': 18, 'color': '#333'}
+                'font': {'size': 16, 'color': '#6c757d', 'weight': 'bold'}
             },
             'xaxis': {
-                'title': 'Time Period',
                 'tickmode': 'array',
                 'tickvals': profit_agg_df['Date'],
                 'ticktext': profit_agg_df['Date'],
-                'showgrid': False,
-                'zeroline': False
+                # MINIMALIST AXIS STYLE
+                'showgrid': False, 
+                'showline': False, 
+                'zeroline': False,
+                'tickfont': {'color': '#adb5bd', 'size': 11, 'weight': 'bold'},
+                'fixedrange': True
             },
             'yaxis': {
-                'title': 'Profit Amount',
-                'showgrid': False,
-                'zeroline': False
+                'showgrid': False, 
+                'showline': False, 
+                'zeroline': False,
+                'showticklabels': False,
+                'fixedrange': True
             },
-            'plot_bgcolor': '#f8f9fa',
-            'paper_bgcolor': '#fff',
-            'margin': {'l': 40, 'r': 20, 't': 60, 'b': 30},
-            'height': 250,
-            'showlegend': False
+            'plot_bgcolor': 'white',
+            'paper_bgcolor': 'white',
+            'margin': {'l': 0, 'r': 0, 't': 40, 'b': 20},
+            'height': 300,
+            'showlegend': False,
+            'hovermode': 'x unified'
         }
     }
 
@@ -3714,6 +3735,7 @@ def update_sustainability_trends(btn_w, btn_m, btn_y):
     
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
