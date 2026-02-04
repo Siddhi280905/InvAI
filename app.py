@@ -898,32 +898,21 @@ def display_page(pathname):
     elif pathname == '/':
         page_layout = dashboard_content
     elif pathname == '/stock-management':
-        page_layout = stock_management_content   
+        page_layout = stock_management_content
     elif pathname == '/reorder-recommendations':
         page_layout = reorder_recommendations_layout
-        
         content_class = "content-container reorder-recommendations-layout-fix"
-    elif pathname == '/supplier': 
+    elif pathname == '/supplier':
         page_layout = supplier_management_layout
-        content_class = "content" 
-    elif pathname == '/sales-trends': 
+        content_class = "content"
+    elif pathname == '/sales-trends':
         page_layout = sales_trends_layout
         content_class = "content-container p-4"
-
-   elif pathname == '/sustainability':
+    elif pathname == '/sustainability':
         page_layout = sustainability_layout
-        # Note: We use a special class to get that full grey background
-        content_class = "sustainability-content" 
-    # ---------------------
-    
-    else:
-        # 404 Case
-        page_layout = html.Div([html.H1("404: Not found"), html.P(f"The pathname {pathname} was not recognised...")])
-        content_class = "content-container"
-
-    
+        content_class = "sustainability-content"
         
-    return page_layout, content_class # This line handles all returns correctly
+    return page_layout, content_class
 
 @app.callback(
     [
@@ -3695,6 +3684,7 @@ sustainability_layout = html.Div(className="sustainability-content p-4", childre
     
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
