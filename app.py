@@ -3512,80 +3512,60 @@ sustainability_layout = html.Div(className="sustainability-content p-4", childre
         ]),
     ]),
 
-    # 3. Historical Wastage Trends & Material Breakdown
-    dbc.Card(className="sus-card mb-5", children=[
-        dbc.CardBody(className="sus-card-body p-4", children=[
+    # 3. Trends & Materials Section (UPDATED WITH IDs)
+    dbc.Card(className="sus-card mb-4", children=[
+        dbc.CardBody(className="p-4", children=[
             dbc.Row([
-                # Left Col: Chart Header & Time Filters
+                # Left: Chart
                 dbc.Col(md=8, children=[
-                    html.Div(className="d-flex justify-content-between align-items-center mb-4", children=[
-                        html.Div([
-                             html.H5("Historical Wastage Trends", className="fw-bold mb-1"),
-                             html.P("Comparing physical waste volume against sustainability targets.", className="text-muted mb-0")
+                    dbc.Row([
+                        dbc.Col([
+                            html.H5("Historical Wastage Trends", className="fw-bold"),
+                            html.P("Comparing physical waste volume against sustainability targets.", className="text-muted small")
                         ]),
-                        html.Div([
-                            dbc.Button("Weekly", className="time-filter-btn active"),
-                            dbc.Button("Monthly", className="time-filter-btn"),
-                            dbc.Button("Yearly", className="time-filter-btn"),
-                        ])
+                        dbc.Col([
+                            # UPDATED BUTTON GROUP WITH IDs
+                            dbc.ButtonGroup([
+                                dbc.Button("Weekly", id="sus-btn-weekly", color="light", className="fw-bold border", n_clicks=0),
+                                dbc.Button("Monthly", id="sus-btn-monthly", color="light", className="fw-bold border", n_clicks=0),
+                                dbc.Button("Yearly", id="sus-btn-yearly", color="light", className="fw-bold border", n_clicks=0),
+                            ], size="sm")
+                        ], className="text-end")
                     ]),
-                    # Big Number & Trend Badge
-                    html.Div(className="d-flex align-items-center mb-3", children=[
-                        html.H2("2,450 kg", className="fw-bold mb-0 me-3", style={'fontSize': '2.5rem'}),
-                        dbc.Badge("-8.4% vs prev. period", color="danger", className="p-2", style={'backgroundColor': '#f8d7da', 'color': '#dc3545', 'fontWeight': '600'})
-                    ]),
-                    # Plotly Chart (Dummy Data)
-                    dcc.Graph(figure=get_sustainability_chart(), config={'displayModeBar': False})
+                    # UPDATED METRICS WITH IDs
+                    html.Div([
+                        html.Span("2,450 kg", id="sus-total-waste", className="display-6 fw-bold me-3"),
+                        dbc.Badge("-8.4% vs prev. period", id="sus-trend-badge", color="danger", className="p-2 opacity-75")
+                    ], className="mt-3 mb-2"),
+                    # UPDATED GRAPH WITH ID
+                    dcc.Graph(id="sus-trend-graph", config={'displayModeBar': False})
                 ]),
-                # Right Col: Waste by Material
-                dbc.Col(md=4, className="ps-md-5 border-start", children=[
+                
+                # Right: Material Breakdown (Unchanged)
+                dbc.Col(md=4, className="ps-md-5 pt-3", children=[
                     html.H6("WASTE BY MATERIAL", className="metric-title-sus mb-4"),
-                    # Material 1: Plastic
                     html.Div(className="mb-4", children=[
-                        html.Div(className="d-flex justify-content-between mb-2", children=[
-                            html.Span("Plastic", className="material-label"),
-                            html.Span("42%", className="material-value")
-                        ]),
-                         html.Div(className="sus-progress-container", children=[
-                             html.Div(className="sus-progress-bar", style={'width': '42%'})
-                         ])
+                        html.Div(["Plastic", html.Span("42%", className="float-end fw-bold")], className="mb-1 fw-bold font-monospace small"),
+                        html.Div(className="sus-progress-container", children=[html.Div(className="sus-progress-bar", style={'width': '42%'})])
                     ]),
-                    # Material 2: Paper
                     html.Div(className="mb-4", children=[
-                        html.Div(className="d-flex justify-content-between mb-2", children=[
-                            html.Span("Paper & Cardboard", className="material-label"),
-                            html.Span("28%", className="material-value")
-                        ]),
-                         html.Div(className="sus-progress-container", children=[
-                             html.Div(className="sus-progress-bar", style={'width': '28%'})
-                         ])
+                        html.Div(["Paper & Cardboard", html.Span("28%", className="float-end fw-bold")], className="mb-1 fw-bold font-monospace small"),
+                        html.Div(className="sus-progress-container", children=[html.Div(className="sus-progress-bar", style={'width': '28%'})])
                     ]),
-                    # Material 3: Food Waste
                     html.Div(className="mb-4", children=[
-                        html.Div(className="d-flex justify-content-between mb-2", children=[
-                            html.Span("Food Waste", className="material-label"),
-                            html.Span("18%", className="material-value")
-                        ]),
-                         html.Div(className="sus-progress-container", children=[
-                             html.Div(className="sus-progress-bar", style={'width': '18%'})
-                         ])
+                        html.Div(["Food Waste", html.Span("18%", className="float-end fw-bold")], className="mb-1 fw-bold font-monospace small"),
+                        html.Div(className="sus-progress-container", children=[html.Div(className="sus-progress-bar", style={'width': '18%'})])
                     ]),
-                    # Material 4: Metal
                     html.Div(className="mb-4", children=[
-                        html.Div(className="d-flex justify-content-between mb-2", children=[
-                            html.Span("Metal", className="material-label"),
-                            html.Span("12%", className="material-value")
-                        ]),
-                         html.Div(className="sus-progress-container", children=[
-                             html.Div(className="sus-progress-bar", style={'width': '12%'})
-                         ])
+                        html.Div(["Metal", html.Span("12%", className="float-end fw-bold")], className="mb-1 fw-bold font-monospace small"),
+                        html.Div(className="sus-progress-container", children=[html.Div(className="sus-progress-bar", style={'width': '12%'})])
                     ]),
-                    html.A([html.I(className="bi bi-chevron-right me-1"), "View Full Analytics"], href="#", className="text-success fw-bold text-decoration-none")
+                    html.A([html.I(className="bi bi-arrow-right"), " View Full Analytics"], href="#", className="text-success fw-bold text-decoration-none small")
                 ])
             ])
         ])
     ]),
-
+    
     # 4. AI-Powered Sustainability Tips
     html.Div(className="mb-4", children=[
         html.H4([html.I(className="bi bi-stars me-2 text-success"), "AI-Powered Sustainability Tips"], className="fw-bold mb-4"),
@@ -3670,20 +3650,10 @@ sustainability_layout = html.Div(className="sustainability-content p-4", childre
              )
         ])
     ]),
-
-    # 6. Footer
-    html.Div(className="sus-footer d-flex justify-content-between align-items-center", children=[
-        html.Div("© 2024 GreenInventory Sustainability Suite"),
-        html.Div([
-            html.A("Compliance", href="#"),
-            html.A("API Docs", href="#"),
-            html.A("Support", href="#"),
-        ])
-    ])
-])
     
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
