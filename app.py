@@ -910,10 +910,16 @@ def display_page(pathname):
         page_layout = sales_trends_layout
         content_class = "content-container p-4"
 
-    elif pathname == '/sustainability':
+   elif pathname == '/sustainability':
         page_layout = sustainability_layout
-        # Use the custom class for the full-page grey background
-        content_class = "sustainability-content p-4"
+        # Note: We use a special class to get that full grey background
+        content_class = "sustainability-content" 
+    # ---------------------
+    
+    else:
+        # 404 Case
+        page_layout = html.Div([html.H1("404: Not found"), html.P(f"The pathname {pathname} was not recognised...")])
+        content_class = "content-container"
 
     
         
@@ -3417,6 +3423,37 @@ def set_product_brand_year_options(stored_data_json):
 
     return options, default_year
 
+
+
+# --- Helper for Sustainability Chart ---
+def get_sustainability_chart():
+    # Dummy data to match the curve in your image
+    days = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
+    # These values create the specific "dip then rise" curve shown
+    values = [1500, 1550, 2800, 2400, 3200, 3600, 4800] 
+
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=days,
+        y=values,
+        mode='lines',
+        fill='tozeroy',
+        line=dict(color='#2eda78', width=4, shape='spline'), # The bright green spline
+        fillcolor='rgba(46, 218, 120, 0.05)' # Very faint green fill
+    ))
+
+    fig.update_layout(
+        margin=dict(l=0, r=0, t=10, b=10),
+        plot_bgcolor='white',
+        paper_bgcolor='white',
+        xaxis=dict(showgrid=False, showline=False, zeroline=False, tickfont=dict(color='#adb5bd', size=11, weight='bold'), fixedrange=True),
+        yaxis=dict(showgrid=False, showline=False, zeroline=False, showticklabels=False, fixedrange=True),
+        height=280,
+        showlegend=False,
+        hovermode='x unified'
+    )
+    return fig
+
 # --- Sustainability Tracker Page Layout ---
 sustainability_layout = html.Div(className="sustainability-content p-4", children=[
     # 1. Header Section
@@ -3658,6 +3695,7 @@ sustainability_layout = html.Div(className="sustainability-content p-4", childre
     
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
