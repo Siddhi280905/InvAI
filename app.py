@@ -3647,12 +3647,83 @@ sustainability_layout = html.Div(className="sustainability-content p-4", childre
                 ],
                  # Hide default header styles to use custom ones defined in CSS
                  css=[{"selector": ".dash-header", "rule": "border-bottom: none; box-shadow: none;"}]
-             )
+             ]
+            )
         ])
     ]),
+
+
+# --- Callback for Sustainability Trends Chart Switching ---
+@app.callback(
+    [Output("sus-trend-graph", "figure"),
+     Output("sus-total-waste", "children"),
+     Output("sus-trend-badge", "children"),
+     Output("sus-trend-badge", "color"),
+     Output("sus-btn-weekly", "active"),
+     Output("sus-btn-monthly", "active"),
+     Output("sus-btn-yearly", "active")],
+    [Input("sus-btn-weekly", "n_clicks"),
+     Input("sus-btn-monthly", "n_clicks"),
+     Input("sus-btn-yearly", "n_clicks")]
+)
+def update_sustainability_trends(btn_w, btn_m, btn_y):
+    ctx = dash.callback_context
+    button_id = ctx.triggered[0]['prop_id'].split('.')[0] if ctx.triggered else "sus-btn-weekly"
+
+    # Default to Weekly Data (The layout from your image)
+    x_data = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
+    y_data = [1500, 1550, 2800, 2400, 3200, 3600, 4800]
+    total_val = "2,450 kg"
+    badge_text = "-8.4% vs prev. week"
+    badge_color = "danger"
+    
+    # Button States
+    is_w, is_m, is_y = True, False, False
+
+    # Switch Data based on button click
+    if button_id == "sus-btn-monthly":
+        x_data = ['Week 1', 'Week 2', 'Week 3', 'Week 4']
+        y_data = [10500, 9800, 11200, 8900] # Monthly dummy data
+        total_val = "10.1 tons"
+        badge_text = "+1.2% vs prev. month"
+        badge_color = "success"
+        is_w, is_m, is_y = False, True, False
+
+    elif button_id == "sus-btn-yearly":
+        x_data = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        y_data = [42, 40, 38, 35, 36, 32, 30, 28, 25, 24, 22, 20] # Yearly trend (downwards is good for waste!)
+        total_val = "372 tons"
+        badge_text = "-15% vs prev. year"
+        badge_color = "success"
+        is_w, is_m, is_y = False, False, True
+
+    # Build the Figure
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=x_data,
+        y=y_data,
+        mode='lines',
+        fill='tozeroy',
+        line=dict(color='#2eda78', width=4, shape='spline'),
+        fillcolor='rgba(46, 218, 120, 0.05)'
+    ))
+
+    fig.update_layout(
+        margin=dict(l=0, r=0, t=10, b=10),
+        plot_bgcolor='white',
+        paper_bgcolor='white',
+        xaxis=dict(showgrid=False, showline=False, zeroline=False, tickfont=dict(color='#adb5bd', size=11, weight='bold'), fixedrange=True),
+        yaxis=dict(showgrid=False, showline=False, zeroline=False, showticklabels=False, fixedrange=True),
+        height=280,
+        showlegend=False,
+        hovermode='x unified'
+    )
+
+    return fig, total_val, badge_text, badge_color, is_w, is_m, is_y
     
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 
