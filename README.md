@@ -19,7 +19,7 @@ InvAI currently offers a robust set of features to monitor and analyze your inve
 
 ## 
 
-## 
+##  
 
 ## **Technologies Used**
 
