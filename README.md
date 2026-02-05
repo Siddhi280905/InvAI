@@ -17,7 +17,7 @@ InvAI currently offers a robust set of features to monitor and analyze your inve
 * **Sales & Trends Report:** Interactive charts displaying total sales and profit trends over various time periods, with detailed breakdowns and filtering options.  
 * **Supplier Performance:** Evaluation of supplier efficiency based on order fulfillment rates and identification of top-performing suppliers.
 
-## 
+###
 
 ##  
 
